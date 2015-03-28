@@ -1,4 +1,5 @@
 import java.util.*;
+import java.lang.Math;
 
 Shape s = new Shape(25, 25, 25);
 Shape obstacle = new Shape(400, 400, 50);
@@ -23,16 +24,16 @@ void draw() {
   background(195, 195, 195);
   //frameRate(120);
   s.drawCircle(255);
-  if (keys[0]) {//&& !intersects(x, y, diameter, diameter, 0)) {
+  if (keys[0] && !intersects(s, obstacle)) {
     s.addY(-1*step);
   }
-  if (keys[1]) {//&& !intersects(x, y, diameter , 1)) {
+  if (keys[1] && !intersects(s, obstacle)) {
     s.addX(-1*step);
   }
-  if (keys[2]) {//&& !intersects(x, y, RLEN, RWID, 2)) {
+  if (keys[2] && !intersects(s, obstacle)) {
     s.addY(step);
   }
-  if (keys[3]) {//&& !intersects(x, y, RLEN, RWID, 3)) {
+  if (keys[3] && !intersects(s, obstacle)) {
     s.addX(step);
   }
   borderCheck();
@@ -86,11 +87,38 @@ void borderCheck() {
   }
 }
 
-boolean intersects(Shape s1, Shape s2){
+boolean intersects(Shape s1, Shape s2) {
+  boolean set = false;
   int xdiff = s1.getX() - s2.getX();
   int ydiff = s1.getY() - s2.getY();
-  
+  int rsum = s1.getR()+s2.getR();
+  int distance = (xdiff)*(xdiff)+(ydiff*ydiff);
+  set = distance < rsum*rsum;
+  if (set) {
+    double theta = Math.atan2(ydiff * 1.0, xdiff * 1.0);
+    int radsum = s1.getR() + s2.getR();
+    int sine = (int) (radsum*(Math.sin(theta))) + 1;
+    int cosine = (int) (radsum*(Math.cos(theta))) + 1;
+    if (theta >= 0.0 && theta <= 90.0) {
+      s1.setX(s2.getX()+cosine);
+      s1.setY(s2.getY()+sine);
+    }
+    if (theta > 90.0 && theta <= 180.0) {
+      s1.setX(s2.getX() - cosine);
+      s1.setY(s2.getY() + sine);
+    }
+    if (theta > -90.0 && theta < 0.0) {
+      s1.setX(s2.getX() - cosine);
+      s1.setY(s2.getY() - sine);
+    }
+    if (theta <= -90.0 && theta > 180.0) {
+      s1.setX(s2.getX() + cosine);
+      s1.setY(s2.getY() - sine);
+    }
+  }
+  return set;
 }
+
 
 /*boolean intersects(int c1x, int c1y, int c2x, int c2y, int c1r, int c2){
  int rsum = c1r+c2r;
